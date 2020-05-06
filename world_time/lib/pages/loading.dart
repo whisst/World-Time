@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'dart:convert';
+import 'package:worldtimeapp/services/world_time.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 class Loading extends StatefulWidget {
   @override
@@ -9,34 +9,49 @@ class Loading extends StatefulWidget {
 
 class _LoadingState extends State<Loading> {
 
-  void getTime() async {
-    // make the request
-    Response response = await get('http://worldtimeapi.org/api/timezone/Europe/London');
-    Map data = jsonDecode(response.body);
-    //print(data);
-
-    // get properties from json
-    String datetime = data['datetime'];
-    String offset = data['utc_offset'].substring(1,3);
-    //print(datetime);
-    //print(offset);
-
-    // create DateTime object
-    DateTime now = DateTime.parse(datetime);
-    now = now.add(Duration(hours: int.parse(offset)));
-    print(now);
+  void setupWorldTime() async {
+    WorldTime instance = WorldTime(location: 'Ha Noi', flag: 'vietnam.png', url: 'Asia/Ho_Chi_Minh');
+    await instance.getTime();
+    Navigator.pushReplacementNamed(context, '/home', arguments: {
+      'location': instance.location,
+      'flag': instance.flag,
+      'time': instance.time,
+      'isDaytime': instance.isDaytime,
+      'date': instance.date,
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    getTime();
+    setupWorldTime();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Text('loading screen'),
+      backgroundColor: Colors.blue[900],
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(0.0, 170.0, 0.0, 0.0),
+        child: Column(
+          children: <Widget>[
+            Text(
+              'World Time',
+              style: TextStyle(
+                fontSize: 50.0,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 70.0),
+            Center(
+              child: SpinKitFadingCube(
+                color: Colors.white,
+                size: 50.0,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
