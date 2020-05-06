@@ -1,34 +1,44 @@
 import 'package:http/http.dart';
 import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class WorldTime {
+  String location;  //location name for the UI
+  String time;      //the time in that location
+  String date;      //the date in that location
+  String flag;      //url to an asset flag icon
+  String url;       //location url for api endpoint
+  bool isDaytime;   //true or false if daytime or not
 
-  String location; // location name for UI
-  String time; // the time in that location
-  String flag; // url to an asset flag icon
-  String url; // location url for api endpoint
+  WorldTime({this.location, this.flag, this.url});
 
-  WorldTime({ this.location, this.flag, this.url });
+  Future<void> getTime() async{
 
-  Future<void> getTime() async {
-    // make the request
-    Response response = await get('http://worldtimeapi.org/api/timezone/$url');
-    Map data = jsonDecode(response.body);
+    try{
+      //make the request
+      Response response = await get('http://worldtimeapi.org/api/timezone/$url');
+      Map data = jsonDecode(response.body);
+      //print(data);
 
-    // get properties from json
-    String datetime = data['datetime'];
-    String offset = data['utc_offset'].substring(1,3);
+      //get the properties from data
+      String datetime = data['datetime'];
+      String offset = data['utc_offset'].substring(0,3);
+      //print(datetime);
+      //print(offset);
 
-    // create DateTime object
-    DateTime now = DateTime.parse(datetime);
-    now = now.add(Duration(hours: int.parse(offset)));
+      //create DateTime object
+      DateTime now = DateTime.parse(datetime);
+      now = now.add(Duration(hours: int.parse(offset)));
+      print(now);
 
-    print(now);
-
-    // set the time property
-    time = now.toString();
+      //set the time properties
+      isDaytime = now.hour >= 6 && now.hour < 19  ? true : false;
+      time = DateFormat.jm().format(now);
+      date = DateFormat.yMMMMEEEEd().format(now);
+      print(time);
+    }
+    catch(e){
+      print('Caught error: $e');
+      time = 'Could not get the Data';
+    }
   }
-
-}
-
-// WorldTime instance = WorldTime(location: 'Berlin', flag: 'germany.png', url: 'Europe/Berlin');
