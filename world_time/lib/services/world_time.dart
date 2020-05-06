@@ -42,4 +42,3 @@ class WorldTime {
       time = 'Could not get the Data';
     }
   }
-}
